@@ -1,29 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "Sorter.h"
 
 int main(int argc, char **argv) {
+	if (argc % 2 != 1) {
+		printf("Error, command line missing parameter\n");
+		return 0;
+	} else if (argc<2) {
+		printf("Usage: ./program -c <dirname>\n");
+	}
+	//boolean flag checks
+	char *columnHeadings = NULL;
+	char *directory = NULL; //default search current directory
+	char *outputDirectory = NULL; //defaut output to current directory 
+	columnheadings = argv[2];
+	int i;
+	for (i=3;i<argc;i+=2) {
+		//flag
+		if (!strcmp(argv[i],"-d")) {
+			directory = argv[i+1];
+		} else if (!strcmp(argv[i],"-o")) {
+			outputDirectory = argv[i+1];
+		} else {
+			printf("FLAG BROKEN\n");
+		}
+	}
 	
-	FILE *in = fopen("movie_metadata.csv", "r");
-
-	char* outputFilename = calloc(1, (strlen("movie_metadata.csv") + strlen("-sorted-") + strlen(argv[2]) + 1) * sizeof(char));
-	strcat(outputFilename, "movie_metadata-sorted-");
-	strcat(outputFilename, argv[2]);
-	strcat(outputFilename, ".csv");
-
-	FILE *out = fopen(outputFilename, "w");
-
-	//struct csv takes in the whole csv file
-	struct csv *csv = parseCSV(in);
-	char *sortBy = argv[2];
+	printf("Initial PID: %d\nPIDS of all child processes:\n", getpid());
+	int totalNumProcesses = parseDir(directory, outputDirectory);
+	printf("\nTotal number of processes %d\n", totalNumProcesses);
 	
-	//sorts csv by sortBy
-	mergesortMovieList(csv, sortBy, csv->columnTypes);
-	//prints out the whole csv in sorted order
-	printCSV(csv, out);
-	
-	freeCSV(csv);
 	return 0;
 }
 
@@ -474,4 +485,73 @@ void setValue(union value *location, char *value, enum type dataType) {
 	} else {
 		printf("Error: Unknown column type for value: %s.\n", value);
 	}
+}
+
+
+int parseDir(char *inputDir, char *outputDir){
+	
+	struct dirent * pDirent;
+	DIR *dir = NULL;
+	if (directory != NULL) {
+		dir = opendir(".");
+	} else {
+		dir = opendir(inputDir);
+	}
+	
+	if () {
+		printf("%sCannot open directory%s\n", directory);
+		exit(0);
+	}
+	
+	int numChildProcesses = 0;
+	int totalNumProcesses = 1;
+	
+	while ((pDirent = readdir(dir)) != NULL) {
+		if (pDirent->) {
+			if (fork()==0){
+				printf("%d", getpid());
+				exit(parseDir());
+			} else {
+				numChildProcesses++;
+			}
+		} else {
+			if (fork()==0){
+				printf("%d", getpid());
+				exit(sortFile());
+			} else {
+				numChildProcesses++;
+			}
+		}
+	}
+	
+	int i;
+	for (i=0;i<numChildProcesses-1;i++) {
+		totalNumProcesses += wait();
+	}
+	return totalNumProcesses;
+}
+
+int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
+	
+	FILE *in = fopen("movie_metadata.csv", "r");
+	
+	char* outputFilename = calloc(1, (strlen("movie_metadata.csv") + strlen("-sorted-") + strlen(argv[2]) + 1) * sizeof(char));
+	strcat(outputFilename, "movie_metadata-sorted-");
+	strcat(outputFilename, argv[2]);
+	strcat(outputFilename, ".csv");
+	
+	FILE *out = fopen(outputFilename, "w");
+	
+	//struct csv takes in the whole csv file
+	struct csv *csv = parseCSV(in);
+	char *sortBy = argv[2];
+	
+	//sorts csv by sortBy
+	mergesortMovieList(csv, sortBy, csv->columnTypes);
+	//prints out the whole csv in sorted order
+	printCSV(csv, out);
+	
+	freeCSV(csv);
+	
+	return;
 }
