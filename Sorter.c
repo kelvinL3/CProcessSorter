@@ -560,11 +560,13 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	strcat(outputFilename, sortBy);
 	strcat(outputFilename, ".csv");
 	
-	FILE *out = fopen(outputFilename, "w");
+	strcat(outputDir, "/");
+	strcat(outputDir, fileName);
+	
+	FILE *out = fopen(outputDir, "w");
 	
 	//struct csv takes in the whole csv file
 	struct csv *csv = parseCSV(in);
-	
 	
 	
 	//char *sortBy = argv[2];
@@ -603,7 +605,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	memcpy(sortVal, temp, (query-temp));
 	sortVal[query-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
-	
 	
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
