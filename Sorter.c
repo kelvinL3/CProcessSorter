@@ -527,7 +527,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int totalNumProcesses = 1;
 	
 	int limitChildren = 0;
-	memcpy(subDir, inputDir);
+	char *subDir;
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
 		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
@@ -540,7 +540,10 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			
 		} else if (pDirent->d_type == DT_DIR) {
 			char *subDir = (char *)malloc((strlen(inputDir)+strlen(pDirent->d_name))* sizeof(char));
-			printf("Regular file with name: %s\n", pDirent->d_name);
+			//memcpy(subDir, inputDir, strlen(inputDir));
+			strcat(subDir, inputDir);
+			strcat(subDir, pDirent->d_name);
+			printf("Regular directory with name: %s\n", pDirent->d_name);
 			/*if (fork()==0){
 				printf("CHILD2PID: %d", getpid());
 				int retVal = parseDir(subDir, outputDir, sortBy);
