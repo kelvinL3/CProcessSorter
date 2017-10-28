@@ -507,8 +507,10 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	struct dirent * pDirent;
 	DIR *dir = NULL;
 	if (inputDir == NULL) {
+		printf("Case1\n");
 		dir = opendir(".");
 	} else {
+		printf("Case2\n");
 		dir = opendir(inputDir);
 	}
 	
@@ -523,7 +525,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	while ((pDirent = readdir(dir)) != NULL) {
 		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
 			if (fork()==0){
-				printf("CHILD1PID: %d", getpid());
+				printf("CHILD1PID: %d\n", getpid());
 				exit(parseDir(pDirent->d_name, outputDir, sortBy));
 			} else {
 				numChildProcesses++;
