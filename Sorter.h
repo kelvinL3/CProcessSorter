@@ -88,4 +88,6 @@ void setValue(union value *location, char *value, enum type dataType);
 
 int parseDir(char *inputDir, char *outputDir, char *sortBy);
 
+int isCSV(char *fname);
+
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy);
