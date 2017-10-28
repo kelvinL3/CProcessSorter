@@ -263,7 +263,7 @@ void printRange(struct csv *csv, int fromRow, int toRow, int columnNumber) {
 
 }
 
-void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *columnTypes) {
+void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *columnTypes, int numberOfSortBys) {
 	
 	struct entry** entries = csv->entries;
 	long low = 0;
@@ -356,13 +356,13 @@ void MergeParts(long low, long high, struct entry** entries, enum type *columnTy
 int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys) {
 	//the values could be string, integer, or decimal
 	int counter = 0;
-	union value location1;
-	union value location2;
+	union value *location1;
+	union value *location2;
 	enum type dataType;
 	int temp=0;
 	while (counter < numberOfSortBys) {
-		location1 = tempArray1->values[compareIndexes[counter]];
-		location2 = tempArray2->values[compareIndexes[counter]];
+		location1 = &(tempArray1->values[compareIndexes[counter]]);
+		location2 = &(tempArray2->values[compareIndexes[counter]]);
 		dataType = columnTypes[compareIndexes[counter]];
 		if (dataType == string) {
 			temp = strcmp(location1->stringVal,location2->stringVal);
@@ -539,8 +539,11 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	}
 	
 	int i;
+	int pid = 0;
+	int status = 0;
 	for (i=0;i<numChildProcesses-1;i++) {
-		totalNumProcesses += wait();
+		pid = wait(&status);
+		totalNumProcesses += status;
 	}
 	return totalNumProcesses;
 }
