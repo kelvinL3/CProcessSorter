@@ -66,13 +66,13 @@ void printRange(struct csv *csv, int fromRow, int toRow, int columnNumber);
 void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes);
 
 //Sorting method: recursive call, splits up array
-void MergeSort(long low, long high, struct entry** entries, int compareIndex, enum type *columnTypes);
+void MergeSort(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Sorting method: regrouping
-void MergeParts(long low, long high, struct entry** entries, int compareIndex, enum type *columnTypes);
+void MergeParts(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Comparing Values in an entry
-int compareValue(union value *location1, union value *location2, enum type dataType);
+int compareValue(union value *location1, union value *location2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Output methods
 void printSortedColumn(struct csv *csv, int compareIndex);
@@ -86,6 +86,6 @@ char *addCharacterToString(char *string, char next, int position);
 struct entry **addEntryToArray(struct entry **array, struct entry *entry, int position);
 void setValue(union value *location, char *value, enum type dataType);
 
-int parseDir(char *inputDir, char *outputDir);
+int parseDir(char *inputDir, char *outputDir, char *sortBy);
 
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy);
