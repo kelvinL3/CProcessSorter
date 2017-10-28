@@ -3,6 +3,8 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include "Sorter.h"
 
 int main(int argc, char **argv) {
@@ -261,68 +263,7 @@ void printRange(struct csv *csv, int fromRow, int toRow, int columnNumber) {
 
 }
 
-void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes) {
-	//!!code changed to handle query that has mutliple sort by values, comma separated
-	
-	//array of strings
-	char **columnNames = csv->columnNames;
-	
-	//find the indexes of the desired field to sort by; color = 0, director_name = 1 ...
-	int numberOfSortBys = 1;
-	int i; 
-	for (i=0; query[i]!='\0'; i++) {
-		if (query[i] == ',') {
-			numberOfSortBys += 1;
-		}
-	}
-	
-	//all the sortby values separated
-	char **arrayOfSortBys = (char **)malloc(numberOfSortBys * sizeof(char *));
-	int counter = 0;
-	
-	//parse out the different sortby values
-	char *temp = query;
-	for (i=0; query[i]!='\0'; i++) {
-		if (query[i] == ',') {
-			char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
-			memcpy(sortVal, temp, (query-temp));
-			sortVal[query-temp] = '\0';
-			arrayOfSortBys[counter] = sortVal;
-			counter++;
-			temp=query+1;
-		}
-	}
-	//for the last value after the last comma
-	char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
-	memcpy(sortVal, temp, (query-temp));
-	sortVal[query-temp] = '\0';
-	arrayOfSortBys[counter] = sortVal;
-	
-	
-	
-	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
-	counter = 0;
-	for (i=0; i<numberOfSortBys; i++) {
-		for (i=0; i < columns; i++) {
-			if (strcmp(columnNames[i], arrayOfSortBys[counter])==0) {
-				indexesOfSortBys[counter] = i;
-				counter++;
-			}
-			//check if header is found
-			if (i == columns) {
-				printf("Error, could not find query in column names\n");
-				exit(0);
-			}
-		}
-	}
-	
-	//free the parsed character array of query
-	for (i=0; i<numberOfSortBys; i++) {
-		free(arrayOfSortBys[i]);
-	}
-	free(arrayOfSortBys);
-	
-	
+void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *columnTypes) {
 	
 	struct entry** entries = csv->entries;
 	long low = 0;
@@ -415,8 +356,8 @@ void MergeParts(long low, long high, struct entry** entries, enum type *columnTy
 int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys) {
 	//the values could be string, integer, or decimal
 	int counter = 0;
-	union value *location1;
-	union value *location2;
+	union value location1;
+	union value location2;
 	enum type dataType;
 	int temp=0;
 	while (counter < numberOfSortBys) {
@@ -565,7 +506,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	
 	struct dirent * pDirent;
 	DIR *dir = NULL;
-	if (directory != NULL) {
+	if (inputDir == NULL) {
 		dir = opendir(".");
 	} else {
 		dir = opendir(inputDir);
@@ -605,12 +546,72 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 }
 
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
+	//!!code changed to handle query that has mutliple sort by values, comma separated
+	//array of strings
+	char **columnNames = csv->columnNames;
+	
+	//find the indexes of the desired field to sort by; color = 0, director_name = 1 ...
+	int numberOfSortBys = 1;
+	int i; 
+	char *query = sortBy;
+	for (i=0; query[i]!='\0'; i++) {
+		if (query[i] == ',') {
+			numberOfSortBys += 1;
+		}
+	}
+	
+	//all the sortBy values separated
+	char **arrayOfSortBys = (char **)malloc(numberOfSortBys * sizeof(char *));
+	int counter = 0;
+	
+	//parse out the different sortBy values
+	char *temp = query;
+	for (i=0; query[i]!='\0'; i++) {
+		if (query[i] == ',') {
+			char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
+			memcpy(sortVal, temp, (query-temp));
+			sortVal[query-temp] = '\0';
+			arrayOfSortBys[counter] = sortVal;
+			counter++;
+			temp=query+1;
+		}
+	}
+	//for the last value after the last comma
+	char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
+	memcpy(sortVal, temp, (query-temp));
+	sortVal[query-temp] = '\0';
+	arrayOfSortBys[counter] = sortVal;
+	
+	
+	
+	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
+	counter = 0;
+	for (i=0; i<numberOfSortBys; i++) {
+		for (i=0; i < columns; i++) {
+			if (strcmp(columnNames[i], arrayOfSortBys[counter])==0) {
+				indexesOfSortBys[counter] = i;
+				counter++;
+			}
+			//check if header is found
+			if (i == columns) {
+				printf("Error, could not find query in column names\n");
+				exit(0);
+			}
+		}
+	}
+	
+	//free the parsed character array of query
+	for (i=0; i<numberOfSortBys; i++) {
+		free(arrayOfSortBys[i]);
+	}
+	free(arrayOfSortBys);
+	
 	
 	FILE *in = fopen("movie_metadata.csv", "r");
 	
-	char* outputFilename = calloc(1, (strlen("movie_metadata.csv") + strlen("-sorted-") + strlen(argv[2]) + 1) * sizeof(char));
+	char* outputFilename = calloc(1, (strlen("movie_metadata.csv") + strlen("-sorted-") + strlen(sortBy) + 1) * sizeof(char));
 	strcat(outputFilename, "movie_metadata-sorted-");
-	strcat(outputFilename, argv[2]);
+	strcat(outputFilename, sortBy);
 	strcat(outputFilename, ".csv");
 	
 	FILE *out = fopen(outputFilename, "w");
@@ -620,7 +621,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	//char *sortBy = argv[2];
 	
 	//sorts csv by sortBy
-	mergesortMovieList(csv, sortBy, csv->columnTypes);
+	mergesortMovieList(csv, indexesOfSortBys, csv->columnTypes);
 	//prints out the whole csv in sorted order
 	printCSV(csv, out);
 	
