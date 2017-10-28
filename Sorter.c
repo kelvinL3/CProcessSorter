@@ -565,9 +565,9 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	if (outputDir != NULL) {
 		strcat(outputDir, "/");
 		strcat(outputDir, outputFilename);
-		*out = fopen(outputDir, "w");
+		out = fopen(outputDir, "w");
 	} else {
-		*out = fopen(outputFilename, "w");
+		out = fopen(outputFilename, "w");
 	}
 	//struct csv takes in the whole csv file
 	struct csv *csv = parseCSV(in);
