@@ -513,7 +513,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	}
 	
 	if (dir == NULL) {
-		printf("%sCannot open directory%s\n", directory);
+		printf("%sCannot open directory%s\n", inputDir);
 		exit(0);
 	}
 	
@@ -543,12 +543,31 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int status = 0;
 	for (i=0;i<numChildProcesses-1;i++) {
 		pid = wait(&status);
+		printf("PID was returned to Parent: %d\n", pid);
 		totalNumProcesses += status;
 	}
 	return totalNumProcesses;
 }
 
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
+	
+	
+	FILE *in = fopen(fileName, "r");
+	
+	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + 1) * sizeof(char));
+	strcat(outputFilename, fileName);
+	strcat(outputFilename, "-sorted-");
+	strcat(outputFilename, sortBy);
+	strcat(outputFilename, ".csv");
+	
+	FILE *out = fopen(outputFilename, "w");
+	
+	//struct csv takes in the whole csv file
+	struct csv *csv = parseCSV(in);
+	
+	
+	
+	//char *sortBy = argv[2];
 	//!!code changed to handle query that has mutliple sort by values, comma separated
 	//array of strings
 	char **columnNames = csv->columnNames;
@@ -608,27 +627,14 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 		free(arrayOfSortBys[i]);
 	}
 	free(arrayOfSortBys);
-	
-	
-	FILE *in = fopen("movie_metadata.csv", "r");
-	
-	char* outputFilename = calloc(1, (strlen("movie_metadata.csv") + strlen("-sorted-") + strlen(sortBy) + 1) * sizeof(char));
-	strcat(outputFilename, "movie_metadata-sorted-");
-	strcat(outputFilename, sortBy);
-	strcat(outputFilename, ".csv");
-	
-	FILE *out = fopen(outputFilename, "w");
-	
-	//struct csv takes in the whole csv file
-	struct csv *csv = parseCSV(in);
-	//char *sortBy = argv[2];
+	//==================
 	
 	//sorts csv by sortBy
-	mergesortMovieList(csv, indexesOfSortBys, csv->columnTypes);
+	mergesortMovieList(csv, indexesOfSortBys, csv->columnTypes, numberOfSortBys);
 	//prints out the whole csv in sorted order
 	printCSV(csv, out);
 	
 	freeCSV(csv);
 	
-	return;
+	return 0;
 }
