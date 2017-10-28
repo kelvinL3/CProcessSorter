@@ -380,7 +380,7 @@ void MergeParts(long low, long high, struct entry** entries, enum type *columnTy
 		//compare succeeding elements in tempArray1 vs succeeding elements in tempArray2
 		//dereference tempArray(1,2) at an index, dereference and grab values, dereference and grab string, decimal, or float value
 		//compareValue returns -1 when element in tempArray1 is smaller and 1 whenelement in tempArray2 is bigger
-		if (compareValue(&(tempArray1[index1-low]), &(tempArray2[index2-(mid+1)]), columnTypes, compareIndexes, numberOfSortBys) == -1) {
+		if (compareValue((tempArray1[index1-low]), (tempArray2[index2-(mid+1)]), columnTypes, compareIndexes, numberOfSortBys) == -1) {
 			//if tempArray1 has the smaller value or they're equal: this makes merge sort stable
 			entries[insertLocation] = tempArray1[index1-low];
 			index1++;
@@ -450,7 +450,7 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 			} else if (temp > 0) {
 				return 1; //first value is bigger
 			} else {
-				counter++
+				counter++;
 				continue;
 			}
 		} else {
