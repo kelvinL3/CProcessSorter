@@ -540,7 +540,8 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			}*/
 			
 		} else if (pDirent->d_type == DT_DIR) {
-			char *subDir = (char *)malloc((strlen(inputDir)+strlen(pDirent->d_name))* sizeof(char));
+			printf("Here\n");
+			char *subDir = (char *)malloc((strlen(inputDir)+strlen(pDirent->d_name)));
 			//memcpy(subDir, inputDir, strlen(inputDir));
 			strcat(subDir, inputDir);
 			strcat(subDir, pDirent->d_name);
