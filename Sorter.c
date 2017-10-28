@@ -541,7 +541,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			
 		} else if (pDirent->d_type == DT_DIR) {
 			printf("Here\n");
-			printf("%zu%zu\n", strlen(inputDir), strlen(pDirent->d_name))	;
+			printf("Heloo?\n %zu %zu \n", strlen(inputDir), strlen(pDirent->d_name));
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)));
 			printf("1\n");
 			//memcpy(subDir, inputDir, strlen(inputDir));
