@@ -560,11 +560,15 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	strcat(outputFilename, sortBy);
 	strcat(outputFilename, ".csv");
 	
-	strcat(outputDir, "/");
-	strcat(outputDir, fileName);
 	
-	FILE *out = fopen(outputDir, "w");
-	
+	FILE *out;
+	if (outputDir != NULL) {
+		strcat(outputDir, "/");
+		strcat(outputDir, outputFilename);
+		*out = fopen(outputDir, "w");
+	} else {
+		*out = fopen(outputFilename, "w");
+	}
 	//struct csv takes in the whole csv file
 	struct csv *csv = parseCSV(in);
 	
