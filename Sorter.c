@@ -520,7 +520,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		printf("Cannot open directory: %s\n", inputDir);
 		exit(0);
 	} else {
-		printf("Directory opened with name: %s\n", inputDir);
+		printf("Directory opened with name: %s\n", dir);
 	}
 	
 	int numChildProcesses = 0;
