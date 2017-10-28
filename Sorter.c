@@ -527,8 +527,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int totalNumProcesses = 1;
 	
 	int limitChildren = 0;
+	printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
-		printf("File Loop to: %s with type %s\n", pDirent->d_name, pDirent->d_type);
+		printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
 		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
 			/*if (fork()==0){
