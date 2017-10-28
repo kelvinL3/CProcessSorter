@@ -553,8 +553,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 				numChildProcesses++;
 				free(subDir);
 			}*/
-			
 		}
+		closedir(dir);
+		
 		if (limitChildren == 299) {
 			printf("\n\n\n\nPREVENT FORK BOMB\n\n\n");
 			break;
@@ -574,6 +575,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 }
 
 int isCSV(char *fname){
+	if (strlen(fname)<5) {
+		return 0;
+	}
 	int i = 0;
 	while (fname[i]!='\0') {
 		i++;
