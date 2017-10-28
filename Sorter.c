@@ -523,14 +523,14 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	while ((pDirent = readdir(dir)) != NULL) {
 		if (pDirent->d_type == DT_REG) {
 			if (fork()==0){
-				printf("%d", getpid());
+				printf("CHILD1PID: %d", getpid());
 				exit(parseDir(pDirent->d_name, outputDir, sortBy));
 			} else {
 				numChildProcesses++;
 			}
 		} else if (pDirent->d_type == DT_DIR) {
 			if (fork()==0){
-				printf("%d", getpid());
+				printf("CHILD2PID: %d", getpid());
 				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
