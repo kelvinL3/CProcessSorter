@@ -15,10 +15,10 @@ int main(int argc, char **argv) {
 		printf("Usage: ./program -c <dirname>\n");
 	}
 	//boolean flag checks
-	char *columnHeadings = NULL;
+	//char *columnHeadings = NULL;
 	char *directory = NULL; //default search current directory
 	char *outputDirectory = NULL; //defaut output to current directory 
-	columnheadings = argv[2];
+	//columnHeadings = argv[2];
 	int i;
 	for (i=3;i<argc;i+=2) {
 		//flag
@@ -32,7 +32,7 @@ int main(int argc, char **argv) {
 	}
 	
 	printf("Initial PID: %d\nPIDS of all child processes:\n", getpid());
-	int totalNumProcesses = parseDir(directory, outputDirectory, &argv[2]);
+	int totalNumProcesses = parseDir(directory, outputDirectory, argv[2]);
 	printf("\nTotal number of processes %d\n", totalNumProcesses);
 	
 	return 0;
@@ -284,7 +284,7 @@ void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes) {
 	char *temp = query;
 	for (i=0; query[i]!='\0'; i++) {
 		if (query[i] == ',') {
-			char *sortVal = (char *) malloc((query-temp+1)sizeof(char));
+			char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
 			memcpy(sortVal, temp, (query-temp));
 			sortVal[query-temp] = '\0';
 			arrayOfSortBys[counter] = sortVal;
@@ -293,7 +293,7 @@ void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes) {
 		}
 	}
 	//for the last value after the last comma
-	char *sortVal = (char *) malloc((query-temp+1)sizeof(char));
+	char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
 	memcpy(sortVal, temp, (query-temp));
 	sortVal[query-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;

@@ -72,7 +72,7 @@ void MergeSort(long low, long high, struct entry** entries, enum type *columnTyp
 void MergeParts(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Comparing Values in an entry
-int compareValue(union value *location1, union value *location2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
+int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Output methods
 void printSortedColumn(struct csv *csv, int compareIndex);
