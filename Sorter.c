@@ -526,14 +526,14 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
 			if (fork()==0){
 				printf("CHILD1PID: %d\n", getpid());
-				exit(parseDir(pDirent->d_name, outputDir, sortBy));
+				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
 			}
 		} else if (pDirent->d_type == DT_DIR) {
 			if (fork()==0){
 				printf("CHILD2PID: %d", getpid());
-				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
+				exit(parseDir(pDirent->d_name, outputDir, sortBy));
 			} else {
 				numChildProcesses++;
 			}
