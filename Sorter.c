@@ -543,7 +543,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			//memcpy(subDir, inputDir, strlen(inputDir));
 			strcat(subDir, inputDir);
 			strcat(subDir, pDirent->d_name);
-			printf("Regular directory with name: %s\n", pDirent->d_name);
+			printf("Regular directory with name: %s\n", subDir);
 			/*if (fork()==0){
 				printf("CHILD2PID: %d", getpid());
 				int retVal = parseDir(subDir, outputDir, sortBy);
