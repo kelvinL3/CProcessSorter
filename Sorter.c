@@ -33,9 +33,11 @@ int main(int argc, char **argv) {
 		}
 	}
 	
+	printf("\nEnter Forking Area\n");
 	printf("Initial PID: %d\nPIDS of all child processes:\n", getpid());
 	int totalNumProcesses = parseDir(directory, outputDirectory, argv[2]);
 	printf("\nTotal number of processes %d\n", totalNumProcesses);
+	printf("\nProcess Completion!\n");
 	
 	return 0;
 }
@@ -272,7 +274,7 @@ void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *colum
 	
 	//start mergeSort
 	MergeSort(low, high, entries, indexesOfSortBys, columnTypes, numberOfSortBys);
-	free(indexesOfSortBys);
+	
 }
 
 void MergeSort(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys){
@@ -517,27 +519,44 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	if (dir == NULL) {
 		printf("Cannot open directory: %s\n", inputDir);
 		exit(0);
+	} else {
+		printf("Directory opened with name: %s\n", inputDir);
 	}
 	
 	int numChildProcesses = 0;
 	int totalNumProcesses = 1;
 	
-	while ((pDirent = readdir(dir)) != NULL) {
+	int limitChildren = 0;
+	memcpy(subDir, inputDir);
+	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
 		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
-			if (fork()==0){
+			printf("Regular CSV with name: %s\n", pDirent->d_name);
+			/*if (fork()==0){
 				printf("CHILD1PID: %d\n", getpid());
 				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
-			}
+			}*/
+			
 		} else if (pDirent->d_type == DT_DIR) {
-			if (fork()==0){
+			char *subDir = (char *)malloc((strlen(inputDir)+strlen(pDirent->d_name))* sizeof(char));
+			printf("Regular file with name: %s\n", pDirent->d_name);
+			/*if (fork()==0){
 				printf("CHILD2PID: %d", getpid());
-				exit(parseDir(pDirent->d_name, outputDir, sortBy));
+				int retVal = parseDir(subDir, outputDir, sortBy);
+				free(subDir);
+				exit(retVal);
 			} else {
 				numChildProcesses++;
-			}
+				free(subDir);
+			}*/
+			
 		}
+		if (limitChildren == 299) {
+			printf("\n\n\n\nPREVENT FORK BOMB\n\n\n");
+			break;
+		}
+		limitChildren++;
 	}
 	
 	int i;
@@ -650,6 +669,9 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	//sorts csv by sortBy
 	mergesortMovieList(csv, indexesOfSortBys, csv->columnTypes, numberOfSortBys);
+	
+	free(indexesOfSortBys);
+	
 	//prints out the whole csv in sorted order
 	printCSV(csv, out);
 	
