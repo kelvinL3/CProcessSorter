@@ -520,7 +520,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		printf("Cannot open directory: %s\n", inputDir);
 		exit(0);
 	} else {
-		printf("Directory opened with name: %s\n", dir);
+		printf("Directory opened with name: %s\n", inputDir);
 	}
 	
 	int numChildProcesses = 0;
@@ -528,6 +528,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	
 	int limitChildren = 0;
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
+		printf("Loop?\n");
 		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
 			/*if (fork()==0){
