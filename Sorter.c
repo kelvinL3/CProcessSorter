@@ -542,8 +542,10 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		} else if (pDirent->d_type == DT_DIR) {
 			printf("Here\n");
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)));
+			printf("1\n");
 			//memcpy(subDir, inputDir, strlen(inputDir));
 			strcat(subDir, inputDir);
+			printf("2\n");
 			strcat(subDir, pDirent->d_name);
 			printf("subDirectory as %s\n", subDir);
 			printf("Regular directory with name: %s\n", subDir);
