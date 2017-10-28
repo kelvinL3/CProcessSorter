@@ -521,7 +521,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int totalNumProcesses = 1;
 	
 	while ((pDirent = readdir(dir)) != NULL) {
-		if (pDirent->d_type == DT_REG) {
+		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
 			if (fork()==0){
 				printf("CHILD1PID: %d", getpid());
 				exit(parseDir(pDirent->d_name, outputDir, sortBy));
@@ -547,6 +547,18 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		totalNumProcesses += status;
 	}
 	return totalNumProcesses;
+}
+
+int isCSV(char *fname){
+	int i = 0;
+	while (fname[i]!='\0') {
+		i++;
+	}
+	if (fname[i-4]=='.' && fname[i-3]=='c' && fname[i-2]=='s' && fname[i-1]=='v') {
+		return 1;
+	}
+	
+	return 0;
 }
 
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
