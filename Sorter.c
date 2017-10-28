@@ -513,7 +513,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	}
 	
 	if (dir == NULL) {
-		printf("%sCannot open directory%s\n", inputDir);
+		printf("Cannot open directory: %s\n", inputDir);
 		exit(0);
 	}
 	
