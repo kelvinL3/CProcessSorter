@@ -687,5 +687,5 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	freeCSV(csv);
 	
-	return 0;
+	return 1;
 }
