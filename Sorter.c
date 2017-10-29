@@ -594,7 +594,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	FILE *in = fopen(fileName, "r");
 	
-	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + 1) * sizeof(char));
+	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv")) * sizeof(char));
 	strcat(outputFilename, fileName);
 	strcat(outputFilename, "-sorted-");
 	strcat(outputFilename, sortBy);
