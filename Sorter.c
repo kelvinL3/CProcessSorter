@@ -536,10 +536,10 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 				numChildProcesses++;
 			}*/
 			
-		} else if (pDirent->d_type == DT_DIR) {
-			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)));
-			//memcpy(subDir, inputDir, strlen(inputDir));
+		} else if (pDirent->d_type == DT_DIR && (!strcmp(pDirent->d_name, ".")) && (!strcmp(pDirent->d_name, ".."))) {
+			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+1));
 			strcat(subDir, inputDir);
+			strcat(subDir, "/");
 			strcat(subDir, pDirent->d_name);
 			printf("Regular directory with name: %s\n", subDir);
 			/*if (fork()==0){
