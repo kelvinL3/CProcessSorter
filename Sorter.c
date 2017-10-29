@@ -537,16 +537,10 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			}*/
 			
 		} else if (pDirent->d_type == DT_DIR) {
-			printf("Here\n");
-			printf("%d", pDirent->d_name);
-			printf("Heloo?\n %lu %lu \n", strlen(inputDir), strlen(pDirent->d_name));
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)));
-			printf("1\n");
 			//memcpy(subDir, inputDir, strlen(inputDir));
 			strcat(subDir, inputDir);
-			printf("2\n");
 			strcat(subDir, pDirent->d_name);
-			printf("subDirectory as %s\n", subDir);
 			printf("Regular directory with name: %s\n", subDir);
 			/*if (fork()==0){
 				printf("CHILD2PID: %d", getpid());
