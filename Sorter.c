@@ -14,7 +14,8 @@ int main(int argc, char **argv) {
 		printf("Error, command line missing parameter\n");
 		return 0;
 	} else if (argc<2) {
-		printf("Usage: ./program -c <dirname>\n");
+		printf("Usage: ./program -c <column> -d <dirname> -o <output dirname>\n");
+		return 0;
 	}
 	//boolean flag checks
 	//char *columnHeadings = NULL;
@@ -29,7 +30,8 @@ int main(int argc, char **argv) {
 		} else if (!strcmp(argv[i],"-o")) {
 			outputDirectory = argv[i+1];
 		} else {
-			printf("FLAG BROKEN\n");
+			printf("Usage: ./program -c <column> -d <dirname> -o <output dirname>\n");
+			return 0;
 		}
 	}
 	
