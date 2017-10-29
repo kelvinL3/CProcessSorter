@@ -529,12 +529,12 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
 		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
-			/*if (fork()==0){
+			if (fork()==0){
 				printf("CHILD1PID: %d\n", getpid());
 				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
-			}*/
+			}
 			
 		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+1));
