@@ -668,16 +668,16 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	}
 	
 	//free the parsed character array of query
-	/*for (i=0; i<numberOfSortBys; i++) {
+	for (i=0; i<numberOfSortBys; i++) {
 		free(arrayOfSortBys[i]);
 	}
-	free(arrayOfSortBys);*/
+	free(arrayOfSortBys);
 	//==================
 	
 	//sorts csv by sortBy
 	mergesortMovieList(csv, indexesOfSortBys, csv->columnTypes, numberOfSortBys);
 	
-	//free(indexesOfSortBys);
+	free(indexesOfSortBys);
 	
 	//prints out the whole csv in sorted order
 	printCSV(csv, out);
