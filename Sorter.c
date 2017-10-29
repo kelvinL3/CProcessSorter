@@ -509,10 +509,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	struct dirent * pDirent;
 	DIR *dir = NULL;
 	if (inputDir == NULL) {
-		dir = opendir(".");
-	} else {
-		dir = opendir(inputDir);
-	}
+		inputDir = ".";
+	} 
+	dir = opendir(inputDir);
 	
 	if (dir == NULL) {
 		printf("Cannot open directory: %s\n", inputDir);
@@ -539,6 +538,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			
 		} else if (pDirent->d_type == DT_DIR) {
 			printf("Here\n");
+			printf("%d", pDirect->d_name);
 			printf("Heloo?\n %lu %lu \n", strlen(inputDir), strlen(pDirent->d_name));
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)));
 			printf("1\n");
