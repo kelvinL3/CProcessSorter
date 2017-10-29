@@ -536,7 +536,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 				numChildProcesses++;
 			}*/
 			
-		} else if (pDirent->d_type == DT_DIR && (!strcmp(pDirent->d_name, ".")) && (!strcmp(pDirent->d_name, ".."))) {
+		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+1));
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
