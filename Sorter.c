@@ -603,9 +603,12 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	FILE *out;
 	if (outputDir != NULL) {
-		strcat(outputDir, "/");
-		strcat(outputDir, outputFilename);
-		out = fopen(outputDir, "w");
+		char *outputLocation = calloc(1, (strlen(outputFilename) + strlen(outputDir) + 1) * sizeof(char));
+		strcat(outputLocation, "/");
+		strcat(outputLocation, outputFilename);
+		out = fopen(outputLocation, "w");
+
+		//Free this later
 	} else {
 		out = fopen(outputFilename, "w");
 	}
