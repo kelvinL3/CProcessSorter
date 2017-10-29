@@ -18,10 +18,8 @@ int main(int argc, char **argv) {
 		return 0;
 	}
 	//boolean flag checks
-	//char *columnHeadings = NULL;
 	char *directory = NULL; //default search current directory
 	char *outputDirectory = NULL; //defaut output to current directory 
-	//columnHeadings = argv[2];
 	int i;
 	for (i=3;i<argc;i+=2) {
 		//flag
@@ -511,10 +509,8 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	struct dirent * pDirent;
 	DIR *dir = NULL;
 	if (inputDir == NULL) {
-		printf("Case1\n");
 		dir = opendir(".");
 	} else {
-		printf("Case2\n");
 		dir = opendir(inputDir);
 	}
 	
@@ -532,7 +528,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
 		printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
-		if ((isCSV(pDirent->d_name)==1) && (pDirent->d_type == DT_REG)) {
+		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
 			/*if (fork()==0){
 				printf("CHILD1PID: %d\n", getpid());
@@ -562,14 +558,15 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 				free(subDir);
 			}*/
 		}
-		closedir(dir);
+		
 		
 		if (limitChildren == 299) {
-			printf("\n\n\n\nPREVENT FORK BOMB\n\n\n");
+			printf("\n\n\n\nPREVENT FORK PARTY!!!\n\n\n");
 			break;
 		}
 		limitChildren++;
 	}
+	closedir(dir);
 	
 	int i;
 	int pid = 0;
