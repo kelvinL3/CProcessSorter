@@ -538,7 +538,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			
 		} else if (pDirent->d_type == DT_DIR) {
 			printf("Here\n");
-			printf("%d", pDirect->d_name);
+			printf("%d", pDirent->d_name);
 			printf("Heloo?\n %lu %lu \n", strlen(inputDir), strlen(pDirent->d_name));
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)));
 			printf("1\n");
