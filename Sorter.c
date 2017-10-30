@@ -684,7 +684,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	printf("\nPrint indexesOfSortBys\n");
 	for (i=0; i<numberOfSortBys; i++) {
-		printf("%d, ", counter[i]);
+		printf("%d, ", indexesOfSortBys[i]);
 	}
 	
 	
