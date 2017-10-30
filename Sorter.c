@@ -672,14 +672,11 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	printf("f4\n");
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
-	counter = 0;
 	for (i=0; i<numberOfSortBys; i++) {
-		for (i=0; i < columns; i++) {
+		for (j=0; j < columns; j++) {
 			//printf("strcmp %s with %s\n", columnNames[i], arrayOfSortBys[counter]);
-			if (strcmp(columnNames[i], arrayOfSortBys[counter])==0) {
-				indexesOfSortBys[counter] = i;
-				//printf("indexesOfSortBys[%d] = %d\n", counter, i);
-				counter++;
+			if (strcmp(columnNames[j], arrayOfSortBys[i])==0) {
+				indexesOfSortBys[i] = j;
 			}
 		}
 		//check if header is found
