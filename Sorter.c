@@ -666,7 +666,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	memcpy(sortVal, temp, (&(query[i])-temp));
 	sortVal[&(query[i])-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
-	printf("sortVal: %s", sortVal);
+	printf("sortVal: %s\n", sortVal);
 	
 	
 	printf("f4\n");
@@ -681,11 +681,11 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 				//printf("indexesOfSortBys[%d] = %d\n", counter, i);
 				counter++;
 			}
-			//check if header is found
-			if (i == columns) {
-				printf("Error, could not find query in column names\n");
-				exit(0);
-			}
+		}
+		//check if header is found
+		if (i == columns) {
+			printf("Error, could not find query in column names\n");
+			exit(0);
 		}
 	}
 	
