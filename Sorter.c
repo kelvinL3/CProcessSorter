@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include "Sorter.h"
 
 int main(int argc, char **argv) {
@@ -426,6 +427,7 @@ void printCSV(struct csv *csv, FILE *file) {
 	long size = csv->numEntries;
 	int i;
 	int j;
+
 	for (i=0;i<columns;i++) {
 		if (i>0) {
 			fprintf(file, ",");
@@ -433,7 +435,7 @@ void printCSV(struct csv *csv, FILE *file) {
 		fprintf(file, "%s", csv->columnNames[i]);
 	}
 	fprintf(file, "\n");
-	
+
 	for (i=0; i<size; i++){
 		for (j=0; j<columns; j++) {
 			if (j>0) {
@@ -549,16 +551,22 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
 			strcat(subDir, pDirent->d_name);
+			char *newOutputDir = (char *)calloc(1, (strlen(outputDir)+strlen(pDirent->d_name)+2));
+			strcat(newOutputDir, outputDir);
+			strcat(newOutputDir, "/");
+			strcat(newOutputDir, pDirent->d_name);
+			mkdir(newOutputDir, ACCESSPERMS);
 			printf("Regular directory with name: %s\n", subDir);
-			/*if (fork()==0){
+			if (fork()==0){
 				printf("CHILD2PID: %d", getpid());
-				int retVal = parseDir(subDir, outputDir, sortBy);
+				int retVal = parseDir(subDir, newOutputDir, sortBy);
 				free(subDir);
 				exit(retVal);
 			} else {
 				numChildProcesses++;
 				free(subDir);
-			}*/
+				free(newOutputDir);
+			}
 		}
 		
 		
@@ -601,8 +609,22 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	printf("f1\n");
 	
-	FILE *in = fopen(fileName, "r");
-	
+	FILE *in;
+
+	if (inputDir != NULL) {
+		char *inputLocation = calloc(1, (strlen(fileName) + strlen(inputDir) + 2) * sizeof(char));
+		strcat(inputLocation, inputDir);
+		strcat(inputLocation, "/");
+		strcat(inputLocation, fileName);
+		in = fopen(inputLocation, "r");
+
+		printf("INPUT: %s!\n", inputLocation);
+
+		free(inputLocation);
+	} else {
+		in = fopen(fileName, "r");
+	}
+
 	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
 	strcat(outputFilename, fileName);
 	strcat(outputFilename, "-sorted-");
@@ -616,12 +638,16 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 		strcat(outputLocation, outputDir);
 		strcat(outputLocation, "/");
 		strcat(outputLocation, outputFilename);
+		mkdir(outputDir, ACCESSPERMS);
 		out = fopen(outputLocation, "w");
 
+		printf("OUTPUT: %s!\n", outputLocation);
+		free(outputLocation);
 		//Free this later
 	} else {
 		out = fopen(outputFilename, "w");
 	}
+	free(outputFilename);
 	//struct csv takes in the whole csv file
 	struct csv *csv = parseCSV(in);
 	
@@ -692,7 +718,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 		printf("%d, ", indexesOfSortBys[i]);
 	}
 	printf("\n");
-	
 	
 	//free the parsed character array of query
 	for (i=0; i<numberOfSortBys; i++) {
