@@ -11,7 +11,6 @@
 /*
 EC2
 Col Checks
-fix output filenames
 free everything that is malloced/calloced
 
 */
@@ -635,6 +634,9 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	char *fileNameWithoutCSV = (char *) malloc((strlen(fileName)-3)*sizeof(char));
 	memcpy(fileNameWithoutCSV, fileName, (strlen(fileName)-2));
 	fileNameWithoutCSV[(strlen(fileName)-3)] = '\0';
+	
+	printf("fileNameWithoutCSV%s\n", fileNameWithoutCSV);
+	
 	
 	char* outputFilename = calloc(1, (strlen(fileNameWithoutCSV) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
 	strcat(outputFilename, fileNameWithoutCSV);
