@@ -672,6 +672,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	printf("f4\n");
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
+	int j;
 	for (i=0; i<numberOfSortBys; i++) {
 		for (j=0; j < columns; j++) {
 			//printf("strcmp %s with %s\n", columnNames[i], arrayOfSortBys[counter]);
