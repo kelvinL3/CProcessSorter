@@ -538,7 +538,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
 			if (fork()==0){
-				printf("CHILD1PID: %d\n", getpid());
+				printf("My (child) PID: %d\n", getpid());
 				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
@@ -686,6 +686,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	for (i=0; i<numberOfSortBys; i++) {
 		printf("%d, ", indexesOfSortBys[i]);
 	}
+	printf("\n");
 	
 	
 	//free the parsed character array of query
