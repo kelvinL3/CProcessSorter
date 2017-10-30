@@ -8,6 +8,13 @@
 #include <sys/stat.h>
 #include "Sorter.h"
 
+/*
+EC2
+Col Checks
+fix output filenames
+free everything that is malloced/calloced
+
+*/
 int main(int argc, char **argv) {
 	//./sorter -c  movie_title -d thisdir -o thatdir
 	//0        1   2           3  4       5  6
@@ -624,9 +631,13 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	} else {
 		in = fopen(fileName, "r");
 	}
-
-	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
-	strcat(outputFilename, fileName);
+	
+	char *fileNameWithoutCSV = (char *) malloc((strlen(fileName)-3)*sizeof(char));
+	memcpy(fileNameWithoutCSV, fileName, (strlen(fileName)-2));
+	fileNameWithoutCSV[(strlen(fileName)-3)] = '\0';
+	
+	char* outputFilename = calloc(1, (strlen(fileNameWithoutCSV) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
+	strcat(outputFilename, fileNameWithoutCSV);
 	strcat(outputFilename, "-sorted-");
 	strcat(outputFilename, sortBy);
 	strcat(outputFilename, ".csv");
