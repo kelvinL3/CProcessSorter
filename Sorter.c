@@ -273,7 +273,7 @@ void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *colum
 	long high = csv->numEntries-1;
 	
 	//start mergeSort
-	MergeSort(low, high, entries, indexesOfSortBys, columnTypes, numberOfSortBys);
+	MergeSort(low, high, entries, columnTypes, indexesOfSortBys, numberOfSortBys);
 	
 }
 
@@ -281,9 +281,9 @@ void MergeSort(long low, long high, struct entry** entries, enum type *columnTyp
 	//split up array until single blocks are made
 	if (low < high){
 		//lower array has the "mid" element
-		MergeSort(low, ((low+high)/2), entries, compareIndexes, columnTypes, numberOfSortBys);
-		MergeSort(((low+high)/2)+1, high, entries, compareIndexes, columnTypes, numberOfSortBys);
-		MergeParts(low, high, entries, compareIndexes, columnTypes, numberOfSortBys);
+		MergeSort(low, ((low+high)/2), entries, columnTypes, compareIndexes, numberOfSortBys);
+		MergeSort(((low+high)/2)+1, high, entries, columnTypes, compareIndexes, numberOfSortBys);
+		MergeParts(low, high, entries, columnTypes, compareIndexes, numberOfSortBys);
 	}
 	return;
 }
@@ -362,7 +362,14 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 	union value *location2;
 	enum type dataType;
 	int temp=0;
+
+	printf("compareIndex[0] = %d", compareIndexes[0]);
+	printf("columnTypes[0] = %d", columnTypes[0]);
+
 	while (counter < numberOfSortBys) {
+
+		printf("Comparing Index %d\n", compareIndexes[counter]);
+
 		location1 = &(tempArray1->values[compareIndexes[counter]]);
 		location2 = &(tempArray2->values[compareIndexes[counter]]);
 		dataType = columnTypes[compareIndexes[counter]];
@@ -397,7 +404,8 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 				continue;
 			}
 		} else {
-			printf("Error: compareValue\n");
+			printf("Error: compareValue: %d\n", dataType);
+			exit(-1);
 		}
 	}
 	return 1; //Both values are exactly the same ==> first value is bigger since mergeSort is stable
@@ -537,7 +545,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			}
 			
 		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
-			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+1));
+			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+2));
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
 			strcat(subDir, pDirent->d_name);
@@ -594,7 +602,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	FILE *in = fopen(fileName, "r");
 	
-	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv")) * sizeof(char));
+	char* outputFilename = calloc(1, (strlen(fileName) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
 	strcat(outputFilename, fileName);
 	strcat(outputFilename, "-sorted-");
 	strcat(outputFilename, sortBy);
@@ -603,7 +611,8 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
 	FILE *out;
 	if (outputDir != NULL) {
-		char *outputLocation = calloc(1, (strlen(outputFilename) + strlen(outputDir) + 1) * sizeof(char));
+		char *outputLocation = calloc(1, (strlen(outputFilename) + strlen(outputDir) + 2) * sizeof(char));
+		strcat(outputLocation, outputDir);
 		strcat(outputLocation, "/");
 		strcat(outputLocation, outputFilename);
 		out = fopen(outputLocation, "w");
@@ -652,14 +661,17 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	memcpy(sortVal, temp, (query-temp));
 	sortVal[query-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
+	printf("sortVal: %s", sortVal);
 	
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
 	counter = 0;
 	for (i=0; i<numberOfSortBys; i++) {
 		for (i=0; i < columns; i++) {
+			//printf("strcmp %s with %s\n", columnNames[i], arrayOfSortBys[counter]);
 			if (strcmp(columnNames[i], arrayOfSortBys[counter])==0) {
 				indexesOfSortBys[counter] = i;
+				//printf("indexesOfSortBys[%d] = %d\n", counter, i);
 				counter++;
 			}
 			//check if header is found

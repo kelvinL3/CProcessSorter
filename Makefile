@@ -5,7 +5,6 @@ clean:
 	rm sorter
 
 run:
-	cat movie_metadata.csv | ./sorter > results.csv -c director_name
-
+	./sorter -c director_name -o result
 debug:
 	gcc Sorter.c -Wall -Werror -fsanitize=address -g -o sorter
