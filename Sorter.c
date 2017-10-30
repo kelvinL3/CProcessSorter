@@ -363,12 +363,12 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 	enum type dataType;
 	int temp=0;
 
-	printf("compareIndex[0] = %d", compareIndexes[0]);
-	printf("columnTypes[0] = %d", columnTypes[0]);
+	//printf("compareIndexes[0] = %d", compareIndexes[0]);
+	//printf("columnTypes[0] = %d", columnTypes[0]);
 
 	while (counter < numberOfSortBys) {
 
-		printf("Comparing Index %d\n", compareIndexes[counter]);
+		//printf("Comparing Index %d\n", compareIndexes[counter]);
 
 		location1 = &(tempArray1->values[compareIndexes[counter]]);
 		location2 = &(tempArray2->values[compareIndexes[counter]]);
@@ -648,18 +648,18 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	char *temp = query;
 	for (i=0; query[i]!='\0'; i++) {
 		if (query[i] == ',') {
-			char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
-			memcpy(sortVal, temp, (query-temp));
-			sortVal[query-temp] = '\0';
+			char *sortVal = (char *) malloc((&(query[i])-temp+1) * sizeof(char));
+			memcpy(sortVal, temp, (&(query[i])-temp));
+			sortVal[&(query[i])-temp] = '\0';
 			arrayOfSortBys[counter] = sortVal;
 			counter++;
-			temp=query+1;
+			temp=&(query[i])+1;
 		}
 	}
 	//for the last value after the last comma
-	char *sortVal = (char *) malloc((query-temp+1) * sizeof(char));
-	memcpy(sortVal, temp, (query-temp));
-	sortVal[query-temp] = '\0';
+	char *sortVal = (char *) malloc((&(query[i])-temp+1) * sizeof(char));
+	memcpy(sortVal, temp, (&(query[i])-temp));
+	sortVal[&(query[i])-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
 	printf("sortVal: %s", sortVal);
 	
@@ -681,6 +681,12 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 			}
 		}
 	}
+	
+	printf("\nPrint indexesOfSortBys\n");
+	for (i=0; i<numberOfSortBys; i++) {
+		printf("%d, ", counter[i]);
+	}
+	
 	
 	//free the parsed character array of query
 	for (i=0; i<numberOfSortBys; i++) {
