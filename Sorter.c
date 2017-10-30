@@ -599,6 +599,7 @@ int isCSV(char *fname){
 
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
+	printf("f1\n");
 	
 	FILE *in = fopen(fileName, "r");
 	
@@ -625,6 +626,8 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	struct csv *csv = parseCSV(in);
 	
 	
+	printf("f2\n");
+	
 	//char *sortBy = argv[2];
 	//!!code changed to handle query that has mutliple sort by values, comma separated
 	//array of strings
@@ -643,6 +646,8 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	//all the sortBy values separated
 	char **arrayOfSortBys = (char **)malloc(numberOfSortBys * sizeof(char *));
 	int counter = 0;
+	
+	printf("f3\n");
 	
 	//parse out the different sortBy values
 	char *temp = query;
@@ -663,6 +668,8 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	arrayOfSortBys[counter] = sortVal;
 	printf("sortVal: %s", sortVal);
 	
+	
+	printf("f4\n");
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
 	counter = 0;
