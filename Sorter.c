@@ -16,6 +16,11 @@ check metadata
 	Initial PID: XXXXX
 	PIDS of all child processes: AAA,BBB,CCC,DDD,EEE,FFF, etc
 	Total number of processes: ZZZZZ
+	
+	
+Fix this problem I thought of for mkdir
+I should check for that before forking
+And I don't rn
 
 */
 int main(int argc, char **argv) {
@@ -86,12 +91,17 @@ struct headerInfo getHeaderInfo(FILE *file) {
 
 	//Ignore leading comma if exists.
 	fscanf(file, ",");
-
+	
+	int numCols = 0;
 	while (!newlineFound) {
 		currentInput = malloc(sizeof(char) * maxStringSize);
 		stringPosition = 0;
 		while (fscanf(file, "%c", &nextChar) > 0) {
+			numCols++;
 			if (nextChar == ',') {
+				if (numCols==28) { // reach here if comma, which implies there is at least one more column heading
+					exit(0);
+				}
 				break;
 			} else if (nextChar == '\n' || nextChar == '\r') {
 				fscanf(file, "\r");
@@ -107,6 +117,9 @@ struct headerInfo getHeaderInfo(FILE *file) {
 		columnNames[retPosition] = currentInput;
 
 		retPosition++;
+	}
+	if (numCols!=28) {
+		exit(0); // return error
 	}
 
 	ret.columnNames = columnNames;
