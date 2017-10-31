@@ -527,6 +527,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	if (inputDir == NULL) {
 		inputDir = ".";
 	} 
+	if (outputDir == NULL) {
+		outputDir = inputDir;
+	}
 	dir = opendir(inputDir);
 	
 	if (dir == NULL) {
@@ -542,7 +545,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int limitChildren = 0;
 	printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
-		//printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
+		printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
 		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
 			if (fork()==0){
@@ -553,6 +556,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			}
 			
 		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
+			printf("directory.\n");
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+2));
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
