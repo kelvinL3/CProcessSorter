@@ -527,9 +527,6 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	if (inputDir == NULL) {
 		inputDir = ".";
 	} 
-	if (outputDir == NULL) {
-		outputDir = inputDir;
-	}
 	dir = opendir(inputDir);
 	
 	if (dir == NULL) {
@@ -545,7 +542,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int limitChildren = 0;
 	printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
-		printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
+		//printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
 		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
 			printf("Regular CSV with name: %s\n", pDirent->d_name);
 			if (fork()==0){
@@ -556,7 +553,6 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			}
 			
 		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
-			printf("directory.\n");
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+2));
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
@@ -669,7 +665,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	struct csv *csv = parseCSV(in);
 	
 	
-	printf("f2\n");
 	
 	//char *sortBy = argv[2];
 	//!!code changed to handle query that has mutliple sort by values, comma separated
@@ -690,7 +685,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	char **arrayOfSortBys = (char **)malloc(numberOfSortBys * sizeof(char *));
 	int counter = 0;
 	
-	printf("f3\n");
 	
 	//parse out the different sortBy values
 	char *temp = query;
@@ -711,8 +705,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	arrayOfSortBys[counter] = sortVal;
 	printf("sortVal: %s\n", sortVal);
 	
-	
-	printf("f4\n");
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
 	int j;
