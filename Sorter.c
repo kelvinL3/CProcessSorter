@@ -297,17 +297,20 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int limitChildren = 0;
 	//printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
-		//printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
+		//files
 		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
-			//printf("Regular CSV with name: %s\n", pDirent->d_name);
+		
+			printf("sortFile: %s in %s\n", pDirent->d_name, inputDir);
+		
 			if (fork()==0){
 				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
 			}
 			
-		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
-			//printf("directory.\n");
+		} //directories
+		else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
+			printf("directory: %s in %s\n", pDirent->d_name, inputDir);
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+2));
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
@@ -317,11 +320,11 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			strcat(newOutputDir, "/");
 			strcat(newOutputDir, pDirent->d_name);
 			mkdir(newOutputDir, ACCESSPERMS);
-			//printf("Regular directory with name: %s\n", subDir);
 			if (fork()==0){
 				//printf("CHILD2PID: %d", getpid());
 				int retVal = parseDir(subDir, newOutputDir, sortBy);
 				free(subDir);
+				//free everything from before
 				exit(retVal);
 			} else {
 				numChildProcesses++;
