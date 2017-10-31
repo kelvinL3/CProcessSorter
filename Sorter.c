@@ -535,28 +535,25 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	if (dir == NULL) {
 		printf("Cannot open directory: %s\n", inputDir);
 		exit(0);
-	} else {
-		printf("Directory opened with name: %s\n", inputDir);
-	}
+	} 
 	
 	int numChildProcesses = 0;
 	int totalNumProcesses = 1;
 	
 	int limitChildren = 0;
-	printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
+	//printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
 	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
-		printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
+		//printf("File Loop to: %s with type %d\n", pDirent->d_name, pDirent->d_type);
 		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
-			printf("Regular CSV with name: %s\n", pDirent->d_name);
+			//printf("Regular CSV with name: %s\n", pDirent->d_name);
 			if (fork()==0){
-				printf("My (child) PID: %d\n", getpid());
 				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
 			} else {
 				numChildProcesses++;
 			}
 			
 		} else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
-			printf("directory.\n");
+			//printf("directory.\n");
 			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+2));
 			strcat(subDir, inputDir);
 			strcat(subDir, "/");
@@ -566,9 +563,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			strcat(newOutputDir, "/");
 			strcat(newOutputDir, pDirent->d_name);
 			mkdir(newOutputDir, ACCESSPERMS);
-			printf("Regular directory with name: %s\n", subDir);
+			//printf("Regular directory with name: %s\n", subDir);
 			if (fork()==0){
-				printf("CHILD2PID: %d", getpid());
+				//printf("CHILD2PID: %d", getpid());
 				int retVal = parseDir(subDir, newOutputDir, sortBy);
 				free(subDir);
 				exit(retVal);
@@ -593,8 +590,9 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	int status = 0;
 	for (i=0;i<numChildProcesses;i++) {
 		pid = wait(&status);
-		printf("PID was returned to Parent: %d\n", pid);
-		printf("Children: %d\n", WEXITSTATUS(status));
+		printf("%d ", pid);
+		//printf("PID was returned to Parent: %d\n", pid);
+		//printf("Children: %d\n", WEXITSTATUS(status));
 		totalNumProcesses += WEXITSTATUS(status);
 	}
 	return totalNumProcesses;
@@ -617,8 +615,6 @@ int isCSV(char *fname){
 
 int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	
-	printf("f1\n");
-	
 	FILE *in;
 
 	if (inputDir != NULL) {
@@ -628,8 +624,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 		strcat(inputLocation, fileName);
 		in = fopen(inputLocation, "r");
 
-		printf("INPUT: %s!\n", inputLocation);
-
 		free(inputLocation);
 	} else {
 		in = fopen(fileName, "r");
@@ -638,8 +632,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	char *fileNameWithoutCSV = (char *) malloc((strlen(fileName)-3)*sizeof(char));
 	memcpy(fileNameWithoutCSV, fileName, (strlen(fileName)-4));
 	fileNameWithoutCSV[(strlen(fileName)-4)] = '\0';
-	
-	printf("\nfileNameWithoutCSV%s\n", fileNameWithoutCSV);
 	
 	
 	char* outputFilename = calloc(1, (strlen(fileNameWithoutCSV) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
@@ -657,8 +649,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 		strcat(outputLocation, outputFilename);
 		mkdir(outputDir, ACCESSPERMS);
 		out = fopen(outputLocation, "w");
-
-		printf("OUTPUT: %s!\n", outputLocation);
 		free(outputLocation);
 		//Free this later
 	} else {
@@ -668,8 +658,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	//struct csv takes in the whole csv file
 	struct csv *csv = parseCSV(in);
 	
-	
-	printf("f2\n");
 	
 	//char *sortBy = argv[2];
 	//!!code changed to handle query that has mutliple sort by values, comma separated
@@ -689,8 +677,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	//all the sortBy values separated
 	char **arrayOfSortBys = (char **)malloc(numberOfSortBys * sizeof(char *));
 	int counter = 0;
-	
-	printf("f3\n");
+
 	
 	//parse out the different sortBy values
 	char *temp = query;
@@ -709,10 +696,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	memcpy(sortVal, temp, (&(query[i])-temp));
 	sortVal[&(query[i])-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
-	printf("sortVal: %s\n", sortVal);
-	
-	
-	printf("f4\n");
+	//printf("sortVal: %s\n", sortVal);
 	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
 	int j;
@@ -729,12 +713,6 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 			exit(0);
 		}
 	}
-	
-	printf("\nPrint indexesOfSortBys\n");
-	for (i=0; i<numberOfSortBys; i++) {
-		printf("%d, ", indexesOfSortBys[i]);
-	}
-	printf("\n");
 	
 	//free the parsed character array of query
 	for (i=0; i<numberOfSortBys; i++) {
