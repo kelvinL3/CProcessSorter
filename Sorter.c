@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 			outputDirectory = argv[i+1];
 			DIR *dir = opendir(outputDirectory);
 			if (!dir && ENOENT == errno) {
-				printf("ERROR: Output directory does not exist.\n");
+				printf("ERROR: Cannot open output directory: %s.\n", outputDirectory);
 				exit(0);
 			}
 		} else {
@@ -299,7 +299,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	dir = opendir(inputDir);
 	
 	if (dir == NULL) {
-		printf("Cannot open directory: %s\n", inputDir);
+		printf("ERROR: Cannot open input directory: %s.\n", inputDir);
 		exit(0);
 	} 
 	
