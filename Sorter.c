@@ -621,7 +621,7 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 			exit(-1);
 		}
 	}
-	return 1; //Both values are exactly the same ==> first value is bigger since mergeSort is stable
+	return -1; //Both values are exactly the same ==> first value is smaller!! since mergeSort is stable
 }
 
 void printSortedColumn(struct csv *csv, int compareIndex) {
