@@ -11,17 +11,12 @@
 
 /*
 EC2
-Col Checks
 free everything that is malloced/calloced
 check metadata
 	Initial PID: XXXXX
 	PIDS of all child processes: AAA,BBB,CCC,DDD,EEE,FFF, etc
 	Total number of processes: ZZZZZ
-	
-	
-Fix this problem I thought of for mkdir
-I should check for that before forking
-And I don't rn
+
 
 */
 int main(int argc, char **argv) {
@@ -56,7 +51,7 @@ int main(int argc, char **argv) {
 	}
 	
 	//METADATA, DO NOT DELETE
-	printf("Initial PID: %d\nPIDS of all child processes:\n", getpid());
+	printf("Initial PID: %d\nPIDS of all child processes:", getpid());
 	int totalNumProcesses = parseDir(directory, outputDirectory, argv[2]);
 	printf("\nTotal number of processes %d\n", totalNumProcesses);
 	
