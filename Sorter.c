@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
 			DIR *dir = opendir(outputDirectory);
 			if (!dir && ENOENT == errno) {
 				printf("ERROR: Output directory does not exist.\n");
+				exit(0);
 			}
 		} else {
 			printf("Usage: ./program -c <column> -d <dirname> -o <output dirname>\n");
