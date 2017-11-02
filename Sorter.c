@@ -391,6 +391,9 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	strcat(outputFilename, "-sorted-");
 	strcat(outputFilename, sortBy);
 	strcat(outputFilename, ".csv");
+
+	free(fileNameWithoutCSV);
+
 	FILE *out;
 	if (outputDir != NULL) {
 		char *outputLocation = calloc(1, (strlen(outputFilename) + strlen(outputDir) + 2) * sizeof(char));
