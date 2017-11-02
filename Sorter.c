@@ -52,6 +52,7 @@ int main(int argc, char **argv) {
 	
 	//METADATA, DO NOT DELETE
 	printf("Initial PID: %d\nPIDS of all child processes:", getpid());
+	fflush(stdout);
 	int totalNumProcesses = parseDir(directory, outputDirectory, argv[2]);
 	printf("\nTotal number of processes %d\n", totalNumProcesses);
 	
@@ -62,7 +63,7 @@ int main(int argc, char **argv) {
 struct csv *parseCSV(FILE *file) {
 	//Pointer to CSV file that will be returned.
 	struct csv *ret = malloc(sizeof(struct csv));
-
+	
 	//Retrieve header info and populate CSV with values.
 	struct headerInfo headerInfo = getHeaderInfo(file);
 	ret->columnTypes = headerInfo.types;
