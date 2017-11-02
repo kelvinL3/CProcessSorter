@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 	}
 	
 	//METADATA, DO NOT DELETE
-	printf("Initial PID: %d\nPIDS of all child processes:", getpid());
+	printf("Initial PID: %d\nPIDS of all child processes: ", getpid());
 	fflush(stdout);
 	int totalNumProcesses = parseDir(directory, outputDirectory, argv[2]);
 	printf("\nTotal number of processes %d\n", totalNumProcesses);
