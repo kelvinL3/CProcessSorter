@@ -287,6 +287,7 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	
 	struct dirent * pDirent;
 	DIR *dir = NULL;
+	int noOutputDir = outputDir == NULL;
 	if (inputDir == NULL) {
 		inputDir = ".";
 	} 
@@ -328,15 +329,15 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			/*char *newOutputDir = (char *)calloc(1, (strlen(outputDir)+strlen(pDirent->d_name)+2));
 			strcat(newOutputDir, outputDir);
 			strcat(newOutputDir, "/");
-			strcat(newOutputDir, pDirent->d_name);
-			mkdir(newOutputDir, ACCESSPERMS);*/
+			strcat(newOutputDir, pDirent->d_name);*/
 			if (fork()==0){
 				//printf("CHILD2PID: %d", getpid());
-				int retVal = parseDir(subDir, outputDir, sortBy);
 				free(subDir);
-				//free everything from before
-				//printf("Exiting parsedir and returning: %d\n", retVal);
-				exit(retVal);
+				if (noOutputDir) {
+					exit(parseDir(subDir, NULL, sortBy));
+				} else {
+					exit(parseDir(subDir, outputDir, sortBy));
+				}
 			} else {
 				numChildProcesses++;
 				free(subDir);
