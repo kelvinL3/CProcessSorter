@@ -332,7 +332,6 @@ int parseDir(char *inputDir, char *outputDir, char *sortBy){
 			strcat(newOutputDir, pDirent->d_name);*/
 			if (fork()==0){
 				//printf("CHILD2PID: %d", getpid());
-				free(subDir);
 				if (noOutputDir) {
 					exit(parseDir(subDir, NULL, sortBy));
 				} else {
