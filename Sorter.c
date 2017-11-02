@@ -12,10 +12,6 @@
 /*
 EC2
 free everything that is malloced/calloced
-check metadata
-	Initial PID: XXXXX
-	PIDS of all child processes: AAA,BBB,CCC,DDD,EEE,FFF, etc
-	Total number of processes: ZZZZZ
 
 
 */
@@ -387,6 +383,7 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	// outputFilename = filename-sorted-[sortby].csv
 	char* outputFilename = calloc(1, (strlen(fileNameWithoutCSV) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
 	strcat(outputFilename, fileNameWithoutCSV);
+	free(fileNameWithoutCSV);
 	strcat(outputFilename, "-sorted-");
 	strcat(outputFilename, sortBy);
 	strcat(outputFilename, ".csv");
@@ -445,6 +442,9 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 	sortVal[&(query[i])-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
 	//printf("sortVal: %s\n", sortVal);
+	
+	free(sortVal);
+	
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
 	int j;
 	for (i=0; i<numberOfSortBys; i++) {
