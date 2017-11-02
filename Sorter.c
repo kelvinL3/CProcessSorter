@@ -19,6 +19,7 @@ check metadata
 
 
 */
+
 int main(int argc, char **argv) {
 	//example of input
 	//./sorter -c  movie_title -d thisdir -o thatdir
@@ -49,7 +50,7 @@ int main(int argc, char **argv) {
 			return 0;
 		}
 	}
-	
+
 	//METADATA, DO NOT DELETE
 	printf("Initial PID: %d\nPIDS of all child processes: ", getpid());
 	fflush(stdout);
@@ -452,10 +453,11 @@ int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
 			//printf("strcmp %s with %s\n", columnNames[i], arrayOfSortBys[counter]);
 			if (strcmp(columnNames[j], arrayOfSortBys[i])==0) {
 				indexesOfSortBys[i] = j;
+				break;
 			}
 		}
 		//check if header is found
-		if (i == columns) {
+		if (j == columns) {
 			printf("Error, could not find query in column names\n");
 			exit(0);
 		}
