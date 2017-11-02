@@ -3,36 +3,57 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "Sorter.h"
 
+/*
+EC2
+free everything that is malloced/calloced
+check metadata
+	Initial PID: XXXXX
+	PIDS of all child processes: AAA,BBB,CCC,DDD,EEE,FFF, etc
+	Total number of processes: ZZZZZ
+
+
+*/
 int main(int argc, char **argv) {
+	//example of input
 	//./sorter -c  movie_title -d thisdir -o thatdir
 	//0        1   2           3  4       5  6
 	if (argc % 2 != 1) {
 		printf("Error, command line missing parameter\n");
 		return 0;
 	} else if (argc<2) {
-		printf("Usage: ./program -c <dirname>\n");
+		printf("Usage: ./program -c <column> -d <dirname> -o <output dirname>\n");
+		return 0;
 	}
-	//boolean flag checks
-	char *columnHeadings = NULL;
-	char *directory = NULL; //default search current directory
-	char *outputDirectory = NULL; //defaut output to current directory 
-	columnheadings = argv[2];
+	
+	char *directory = NULL; 
+	char *outputDirectory = NULL;
 	int i;
 	for (i=3;i<argc;i+=2) {
-		//flag
 		if (!strcmp(argv[i],"-d")) {
 			directory = argv[i+1];
 		} else if (!strcmp(argv[i],"-o")) {
 			outputDirectory = argv[i+1];
+			DIR *dir = opendir(outputDirectory);
+			if (!dir && ENOENT == errno) {
+				printf("ERROR: Cannot open output directory: %s.\n", outputDirectory);
+				exit(0);
+			}
 		} else {
-			printf("FLAG BROKEN\n");
+			printf("Usage: ./program -c <column> -d <dirname> -o <output dirname>\n");
+			return 0;
 		}
 	}
 	
-	printf("Initial PID: %d\nPIDS of all child processes:\n", getpid());
-	int totalNumProcesses = parseDir(directory, outputDirectory, &argv[2]);
+	//METADATA, DO NOT DELETE
+	printf("Initial PID: %d\nPIDS of all child processes: ", getpid());
+	fflush(stdout);
+	int totalNumProcesses = parseDir(directory, outputDirectory, argv[2]);
 	printf("\nTotal number of processes %d\n", totalNumProcesses);
 	
 	return 0;
@@ -40,15 +61,13 @@ int main(int argc, char **argv) {
 
 ///Parses CSV and returns a pointer to CSV.
 struct csv *parseCSV(FILE *file) {
-
 	//Pointer to CSV file that will be returned.
 	struct csv *ret = malloc(sizeof(struct csv));
-
+	
 	//Retrieve header info and populate CSV with values.
 	struct headerInfo headerInfo = getHeaderInfo(file);
 	ret->columnTypes = headerInfo.types;
 	ret->columnNames = headerInfo.columnNames;
-
 	//populate entries and total number of entries
 	struct entryInfo entryInfo = getCSVEntries(file, ret->columnTypes);
 	ret->entries = entryInfo.entries;
@@ -72,7 +91,7 @@ struct headerInfo getHeaderInfo(FILE *file) {
 
 	//Ignore leading comma if exists.
 	fscanf(file, ",");
-
+	
 	while (!newlineFound) {
 		currentInput = malloc(sizeof(char) * maxStringSize);
 		stringPosition = 0;
@@ -93,6 +112,9 @@ struct headerInfo getHeaderInfo(FILE *file) {
 		columnNames[retPosition] = currentInput;
 
 		retPosition++;
+	}
+	if (retPosition != 28) {
+		exit(1);
 	}
 
 	ret.columnNames = columnNames;
@@ -227,7 +249,6 @@ enum type getTypeFromColumnName(char *name) {
 ///Debugging method to print values from the CSV.
 void printRange(struct csv *csv, int fromRow, int toRow, int columnNumber) {
 //NOTE: ROW 2 ON EXCEL IS CONSIDERED ROW 0 HERE SINCE THE FIRST ROW CONTAINS HEADER INFO AND NOT ACTUAL DATA.
-
 	char *columnTypeAsString;
 
 	enum type columnType = csv->columnTypes[columnNumber];
@@ -261,58 +282,182 @@ void printRange(struct csv *csv, int fromRow, int toRow, int columnNumber) {
 
 }
 
-void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes) {
-	//!!code changed to handle query that has mutliple sort by values, comma separated
+int parseDir(char *inputDir, char *outputDir, char *sortBy){
 	
+	struct dirent * pDirent;
+	DIR *dir = NULL;
+	if (inputDir == NULL) {
+		inputDir = ".";
+	} 
+	if (outputDir == NULL) {
+		outputDir = inputDir;
+	}
+	dir = opendir(inputDir);
+	
+	if (dir == NULL) {
+		printf("ERROR: Cannot open input directory: %s.\n", inputDir);
+		exit(0);
+	} 
+	
+	int numChildProcesses = 0;
+	int totalNumProcesses = 1;
+	
+	int limitChildren = 0;
+	//printf("DT_REG = %d: DT_DIR = %d\n", DT_REG, DT_DIR);
+	while (((pDirent = readdir(dir)) != NULL) && limitChildren < 300) {
+		//files
+		if (isCSV(pDirent->d_name) && pDirent->d_type == DT_REG) {
+		
+			//printf("sortFile: %s in %s\n", pDirent->d_name, inputDir);
+		
+			if (fork()==0){
+				int val = sortFile(inputDir, outputDir, pDirent->d_name, sortBy);
+				exit(val);
+			} else {
+				numChildProcesses++;
+			}
+			
+		} //directories
+		else if (pDirent->d_type == DT_DIR && (strcmp(pDirent->d_name, ".")) && (strcmp(pDirent->d_name, ".."))) {
+			//printf("directory: %s in %s\n", pDirent->d_name, inputDir);
+			char *subDir = (char *)calloc(1, (strlen(inputDir)+strlen(pDirent->d_name)+2));
+			strcat(subDir, inputDir);
+			strcat(subDir, "/");
+			strcat(subDir, pDirent->d_name);
+			/*char *newOutputDir = (char *)calloc(1, (strlen(outputDir)+strlen(pDirent->d_name)+2));
+			strcat(newOutputDir, outputDir);
+			strcat(newOutputDir, "/");
+			strcat(newOutputDir, pDirent->d_name);
+			mkdir(newOutputDir, ACCESSPERMS);*/
+			if (fork()==0){
+				//printf("CHILD2PID: %d", getpid());
+				int retVal = parseDir(subDir, outputDir, sortBy);
+				free(subDir);
+				//free everything from before
+				//printf("Exiting parsedir and returning: %d\n", retVal);
+				exit(retVal);
+			} else {
+				numChildProcesses++;
+				free(subDir);
+				//free(newOutputDir);
+			}
+		}
+		
+		if (limitChildren == 299) {
+			printf("\n\n\n\nPREVENT FORK PARTY!!!\n\n\n");
+			break;
+		}
+		limitChildren++;
+	}
+	closedir(dir);
+	
+	int i;
+	int pid = 0;
+	int status = 0;
+	//printf("PID: %d, Waiting for %d threads.\n", getpid(), numChildProcesses);
+	for (i=0;i<numChildProcesses;i++) {
+		pid = wait(&status);
+		printf("%d ", pid);
+		//printf("PID was returned to Parent: %d\n", pid);
+		//printf("Children: %d\n", WEXITSTATUS(status));
+		totalNumProcesses += WEXITSTATUS(status);
+		//printf("PID: %d, EXIT STATUS: %d, totalNumProcess = %d\n", getpid(), WEXITSTATUS(status), totalNumProcesses);
+	}
+	return totalNumProcesses;
+}
+
+int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
+	FILE *in;
+	if (inputDir != NULL) {
+		char *inputLocation = calloc(1, (strlen(fileName) + strlen(inputDir) + 2) * sizeof(char));
+		strcat(inputLocation, inputDir);
+		strcat(inputLocation, "/");
+		strcat(inputLocation, fileName);
+		in = fopen(inputLocation, "r");
+
+		free(inputLocation);
+	} else {
+		in = fopen(fileName, "r");
+	}
+	// remove .csv from the name
+	char *fileNameWithoutCSV = (char *) malloc((strlen(fileName)-3)*sizeof(char));
+	memcpy(fileNameWithoutCSV, fileName, (strlen(fileName)-4));
+	fileNameWithoutCSV[(strlen(fileName)-4)] = '\0';
+	
+	// outputFilename = filename-sorted-[sortby].csv
+	char* outputFilename = calloc(1, (strlen(fileNameWithoutCSV) + strlen("-sorted-") + strlen(sortBy) + strlen(".csv") + 1) * sizeof(char));
+	strcat(outputFilename, fileNameWithoutCSV);
+	strcat(outputFilename, "-sorted-");
+	strcat(outputFilename, sortBy);
+	strcat(outputFilename, ".csv");
+	FILE *out;
+	if (outputDir != NULL) {
+		char *outputLocation = calloc(1, (strlen(outputFilename) + strlen(outputDir) + 2) * sizeof(char));
+		strcat(outputLocation, outputDir);
+		strcat(outputLocation, "/");
+		strcat(outputLocation, outputFilename);
+		mkdir(outputDir, ACCESSPERMS);
+		out = fopen(outputLocation, "w");
+		free(outputLocation);
+	} else {
+		out = fopen(outputFilename, "w");
+	}
+	free(outputFilename);
+	//struct csv takes in the whole csv file
+
+	struct csv *csv = parseCSV(in);
+	
+	//char *sortBy = argv[2];
+	//!!code changed to handle query that has mutliple sort by values, comma separated
 	//array of strings
 	char **columnNames = csv->columnNames;
 	
 	//find the indexes of the desired field to sort by; color = 0, director_name = 1 ...
 	int numberOfSortBys = 1;
 	int i; 
+	char *query = sortBy;
 	for (i=0; query[i]!='\0'; i++) {
 		if (query[i] == ',') {
 			numberOfSortBys += 1;
 		}
 	}
 	
-	//all the sortby values separated
+	//all the sortBy values separated
 	char **arrayOfSortBys = (char **)malloc(numberOfSortBys * sizeof(char *));
 	int counter = 0;
+
 	
-	//parse out the different sortby values
+	//parse out the different sortBy values
 	char *temp = query;
 	for (i=0; query[i]!='\0'; i++) {
 		if (query[i] == ',') {
-			char *sortVal = (char *) malloc((query-temp+1)sizeof(char));
-			memcpy(sortVal, temp, (query-temp));
-			sortVal[query-temp] = '\0';
+			char *sortVal = (char *) malloc((&(query[i])-temp+1) * sizeof(char));
+			memcpy(sortVal, temp, (&(query[i])-temp));
+			sortVal[&(query[i])-temp] = '\0';
 			arrayOfSortBys[counter] = sortVal;
 			counter++;
-			temp=query+1;
+			temp=&(query[i])+1;
 		}
 	}
 	//for the last value after the last comma
-	char *sortVal = (char *) malloc((query-temp+1)sizeof(char));
-	memcpy(sortVal, temp, (query-temp));
-	sortVal[query-temp] = '\0';
+	char *sortVal = (char *) malloc((&(query[i])-temp+1) * sizeof(char));
+	memcpy(sortVal, temp, (&(query[i])-temp));
+	sortVal[&(query[i])-temp] = '\0';
 	arrayOfSortBys[counter] = sortVal;
-	
-	
-	
+	//printf("sortVal: %s\n", sortVal);
 	int *indexesOfSortBys = (int *) malloc(numberOfSortBys * sizeof(int));
-	counter = 0;
+	int j;
 	for (i=0; i<numberOfSortBys; i++) {
-		for (i=0; i < columns; i++) {
-			if (strcmp(columnNames[i], arrayOfSortBys[counter])==0) {
-				indexesOfSortBys[counter] = i;
-				counter++;
+		for (j=0; j < columns; j++) {
+			//printf("strcmp %s with %s\n", columnNames[i], arrayOfSortBys[counter]);
+			if (strcmp(columnNames[j], arrayOfSortBys[i])==0) {
+				indexesOfSortBys[i] = j;
 			}
-			//check if header is found
-			if (i == columns) {
-				printf("Error, could not find query in column names\n");
-				exit(0);
-			}
+		}
+		//check if header is found
+		if (i == columns) {
+			printf("Error, could not find query in column names\n");
+			exit(0);
 		}
 	}
 	
@@ -321,8 +466,20 @@ void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes) {
 		free(arrayOfSortBys[i]);
 	}
 	free(arrayOfSortBys);
+	//sorts csv by sortBy
+	mergesortMovieList(csv, indexesOfSortBys, csv->columnTypes, numberOfSortBys);
 	
+	free(indexesOfSortBys);
 	
+	//prints out the whole csv in sorted order
+	printCSV(csv, out);
+	
+	freeCSV(csv);
+	
+	return 1;
+}
+
+void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *columnTypes, int numberOfSortBys) {
 	
 	struct entry** entries = csv->entries;
 	long low = 0;
@@ -330,17 +487,17 @@ void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes) {
 	long high = csv->numEntries-1;
 	
 	//start mergeSort
-	MergeSort(low, high, entries, indexesOfSortBys, columnTypes, numberOfSortBys);
-	free(indexesOfSortBys);
+	MergeSort(low, high, entries, columnTypes, indexesOfSortBys, numberOfSortBys);
+	
 }
 
 void MergeSort(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys){
 	//split up array until single blocks are made
 	if (low < high){
 		//lower array has the "mid" element
-		MergeSort(low, ((low+high)/2), entries, compareIndexes, columnTypes, numberOfSortBys);
-		MergeSort(((low+high)/2)+1, high, entries, compareIndexes, columnTypes, numberOfSortBys);
-		MergeParts(low, high, entries, compareIndexes, columnTypes, numberOfSortBys);
+		MergeSort(low, ((low+high)/2), entries, columnTypes, compareIndexes, numberOfSortBys);
+		MergeSort(((low+high)/2)+1, high, entries, columnTypes, compareIndexes, numberOfSortBys);
+		MergeParts(low, high, entries, columnTypes, compareIndexes, numberOfSortBys);
 	}
 	return;
 }
@@ -380,7 +537,7 @@ void MergeParts(long low, long high, struct entry** entries, enum type *columnTy
 		//compare succeeding elements in tempArray1 vs succeeding elements in tempArray2
 		//dereference tempArray(1,2) at an index, dereference and grab values, dereference and grab string, decimal, or float value
 		//compareValue returns -1 when element in tempArray1 is smaller and 1 whenelement in tempArray2 is bigger
-		if (compareValue(&(tempArray1[index1-low]), &(tempArray2[index2-(mid+1)]), columnTypes, compareIndexes, numberOfSortBys) == -1) {
+		if (compareValue((tempArray1[index1-low]), (tempArray2[index2-(mid+1)]), columnTypes, compareIndexes, numberOfSortBys) == -1) {
 			//if tempArray1 has the smaller value or they're equal: this makes merge sort stable
 			entries[insertLocation] = tempArray1[index1-low];
 			index1++;
@@ -419,9 +576,16 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 	union value *location2;
 	enum type dataType;
 	int temp=0;
+
+	//printf("compareIndexes[0] = %d", compareIndexes[0]);
+	//printf("columnTypes[0] = %d", columnTypes[0]);
+
 	while (counter < numberOfSortBys) {
-		location1 = tempArray1->values[compareIndexes[counter]];
-		location2 = tempArray2->values[compareIndexes[counter]];
+
+		//printf("Comparing Index %d\n", compareIndexes[counter]);
+
+		location1 = &(tempArray1->values[compareIndexes[counter]]);
+		location2 = &(tempArray2->values[compareIndexes[counter]]);
 		dataType = columnTypes[compareIndexes[counter]];
 		if (dataType == string) {
 			temp = strcmp(location1->stringVal,location2->stringVal);
@@ -450,14 +614,15 @@ int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *
 			} else if (temp > 0) {
 				return 1; //first value is bigger
 			} else {
-				counter++
+				counter++;
 				continue;
 			}
 		} else {
-			printf("Error: compareValue\n");
+			printf("Error: compareValue: %d\n", dataType);
+			exit(-1);
 		}
 	}
-	return 1; //Both values are exactly the same ==> first value is bigger since mergeSort is stable
+	return -1; //Both values are exactly the same ==> first value is smaller!! since mergeSort is stable
 }
 
 void printSortedColumn(struct csv *csv, int compareIndex) {
@@ -475,6 +640,7 @@ void printCSV(struct csv *csv, FILE *file) {
 	long size = csv->numEntries;
 	int i;
 	int j;
+
 	for (i=0;i<columns;i++) {
 		if (i>0) {
 			fprintf(file, ",");
@@ -482,7 +648,7 @@ void printCSV(struct csv *csv, FILE *file) {
 		fprintf(file, "%s", csv->columnNames[i]);
 	}
 	fprintf(file, "\n");
-	
+
 	for (i=0; i<size; i++){
 		for (j=0; j<columns; j++) {
 			if (j>0) {
@@ -561,70 +727,17 @@ void setValue(union value *location, char *value, enum type dataType) {
 	}
 }
 
-int parseDir(char *inputDir, char *outputDir, char *sortBy){
-	
-	struct dirent * pDirent;
-	DIR *dir = NULL;
-	if (directory != NULL) {
-		dir = opendir(".");
-	} else {
-		dir = opendir(inputDir);
+int isCSV(char *fname){
+	if (strlen(fname)<5) {
+		return 0;
+	}
+	int i = 0;
+	while (fname[i]!='\0') {
+		i++;
+	}
+	if (fname[i-4]=='.' && fname[i-3]=='c' && fname[i-2]=='s' && fname[i-1]=='v') {
+		return 1;
 	}
 	
-	if (dir == NULL) {
-		printf("%sCannot open directory%s\n", directory);
-		exit(0);
-	}
-	
-	int numChildProcesses = 0;
-	int totalNumProcesses = 1;
-	
-	while ((pDirent = readdir(dir)) != NULL) {
-		if (pDirent->d_type == DT_REG) {
-			if (fork()==0){
-				printf("%d", getpid());
-				exit(parseDir(pDirent->d_name, outputDir, sortBy));
-			} else {
-				numChildProcesses++;
-			}
-		} else if (pDirent->d_type == DT_DIR) {
-			if (fork()==0){
-				printf("%d", getpid());
-				exit(sortFile(inputDir, outputDir, pDirent->d_name, sortBy));
-			} else {
-				numChildProcesses++;
-			}
-		}
-	}
-	
-	int i;
-	for (i=0;i<numChildProcesses-1;i++) {
-		totalNumProcesses += wait();
-	}
-	return totalNumProcesses;
-}
-
-int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy){
-	
-	FILE *in = fopen("movie_metadata.csv", "r");
-	
-	char* outputFilename = calloc(1, (strlen("movie_metadata.csv") + strlen("-sorted-") + strlen(argv[2]) + 1) * sizeof(char));
-	strcat(outputFilename, "movie_metadata-sorted-");
-	strcat(outputFilename, argv[2]);
-	strcat(outputFilename, ".csv");
-	
-	FILE *out = fopen(outputFilename, "w");
-	
-	//struct csv takes in the whole csv file
-	struct csv *csv = parseCSV(in);
-	//char *sortBy = argv[2];
-	
-	//sorts csv by sortBy
-	mergesortMovieList(csv, sortBy, csv->columnTypes);
-	//prints out the whole csv in sorted order
-	printCSV(csv, out);
-	
-	freeCSV(csv);
-	
-	return;
+	return 0;
 }

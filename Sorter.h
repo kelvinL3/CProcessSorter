@@ -62,8 +62,15 @@ enum type getTypeFromColumnName(char *name);
 //Debugging Methods
 void printRange(struct csv *csv, int fromRow, int toRow, int columnNumber);
 
+//included for parsing "recursively" through subdirectories
+int parseDir(char *inputDir, char *outputDir, char *sortBy);
+
+int isCSV(char *fname);
+
+int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy);
+
 //Sorting method: setup variables
-void mergesortMovieList(struct csv *csv, char *query, enum type *columnTypes);
+void mergesortMovieList(struct csv *csv, int *indexesOfSortBys, enum type *columnTypes, int numberOfSortBys);
 
 //Sorting method: recursive call, splits up array
 void MergeSort(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
@@ -72,7 +79,7 @@ void MergeSort(long low, long high, struct entry** entries, enum type *columnTyp
 void MergeParts(long low, long high, struct entry** entries, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Comparing Values in an entry
-int compareValue(union value *location1, union value *location2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
+int compareValue(struct entry *tempArray1, struct entry *tempArray2, enum type *columnTypes, int *compareIndexes, int numberOfSortBys);
 
 //Output methods
 void printSortedColumn(struct csv *csv, int compareIndex);
@@ -86,6 +93,3 @@ char *addCharacterToString(char *string, char next, int position);
 struct entry **addEntryToArray(struct entry **array, struct entry *entry, int position);
 void setValue(union value *location, char *value, enum type dataType);
 
-int parseDir(char *inputDir, char *outputDir, char *sortBy);
-
-int sortFile(char *inputDir, char *outputDir, char *fileName, char *sortBy);

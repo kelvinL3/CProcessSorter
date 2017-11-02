@@ -1,0 +1,14 @@
+Sub DeleteEveryOtherRow()
+'Updateby20160122
+Dim rng As Range
+Dim InputRng As Range
+xTitleId = "KutoolsforExcel"
+Set InputRng = Application.Selection
+Set InputRng = Application.InputBox("Range :", xTitleId, InputRng.Address, Type:=8)
+Application.ScreenUpdating = False
+For i = InputRng.Rows.Count To 1 Step -2
+    Set rng = InputRng.Cells(i, 1)
+    rng.EntireRow.Delete
+Next
+Application.ScreenUpdating = True
+End Sub
